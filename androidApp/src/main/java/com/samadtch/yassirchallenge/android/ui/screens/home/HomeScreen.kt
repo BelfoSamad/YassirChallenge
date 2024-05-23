@@ -60,17 +60,16 @@ fun HomeScreen(
 ) {
     //------------------------------- Declarations
     val uiState = viewModel.uiState.collectAsLazyPagingItems()
-    var refreshing by remember { mutableStateOf(false) }
-    var allowRefresh by remember { mutableStateOf(false) }
+    var refreshing by remember { mutableStateOf(false) } //Refresh State
     var errorOccurred by remember { mutableStateOf(false) }
     val state = rememberPullRefreshState(
         refreshing = refreshing,
         onRefresh = {
-            if(allowRefresh) {
+            // Only Refresh if there is an Error
+            if(errorOccurred) {
                 refreshing = true
                 uiState.refresh()
                 refreshing = false
-                allowRefresh = false
             }
         }
     )
@@ -109,7 +108,7 @@ fun HomeScreen(
                     }
                 }
 
-                //Movies
+                //List of Movies
                 items(uiState.itemCount) { index ->
                     val movie = uiState[index]
                     MovieItem(movie!!, onMovieClicked = goMovie)
@@ -129,19 +128,15 @@ fun HomeScreen(
                                 MovieShimmerEffect(); Spacer(Modifier.padding(8.dp))
                             }
                         }
-
                         is LoadState.Error -> {
+                            //State is called multiple times, handle error only the first time
                             if(!errorOccurred) handleError(
                                 error = (uiState.loadState.refresh as LoadState.Error).error as Exception,
                                 onShowSnackbar = onShowSnackbar
                             )
                             errorOccurred = true
-                            allowRefresh = true
                         }
-
-                        is LoadState.NotLoading -> {
-                            //NOTHING
-                        }
+                        is LoadState.NotLoading -> {}
                     }
 
                     //Loading more Items
@@ -149,31 +144,31 @@ fun HomeScreen(
                         is LoadState.Loading -> {
                             item {
                                 //Loading New Items
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .align(Alignment.CenterHorizontally)
-                                        .size(32.dp),
-                                    color = MaterialTheme.colorScheme.tertiary,
-                                )
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(32.dp),
+                                        color = MaterialTheme.colorScheme.tertiary,
+                                    )
+                                }
                             }
                         }
-
                         is LoadState.Error -> {
-                            if(!errorOccurred) handleError(
+                            //If Error happens while appending data only show Snackbar
+                            handleError(
                                 error = (uiState.loadState.refresh as LoadState.Error).error as Exception,
                                 onShowSnackbar = onShowSnackbar
                             )
-                            refreshing = true
                         }
-
                         is LoadState.NotLoading -> {}
                     }
                 }
             }
 
-            //Error
+            /*
+             * errorOccurred is triggered only when there is an error while fetching data initially
+             * since there will be no results show the error message
+             */
             if (errorOccurred) {
-                println("ERROR")
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -193,7 +188,6 @@ fun HomeScreen(
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
-
             }
         }
 
@@ -206,8 +200,8 @@ fun handleError(error: Exception, onShowSnackbar: (String) -> Unit) {
     val errorRequests = "You have reached the maximum number of requests. Please try again later."
     val errorServer = "We encountered an issue while contacting the server. Please try again later."
     val errorKey = "The API Key is invalid. To continue using our services, please update your app."
-    val errorNetwork =
-        "Unable to establish a connection. Please verify your network connection and attempt again."
+    val errorNetwork = "Unable to establish a connection. Please verify your network connection and attempt again."
+
     when (error) {
         is UnresolvedAddressException -> onShowSnackbar(errorNetwork)
         is ClientRequestException -> {
@@ -217,7 +211,6 @@ fun handleError(error: Exception, onShowSnackbar: (String) -> Unit) {
                 else -> onShowSnackbar(errorServer)
             }
         }
-
         is ServerResponseException -> {
             when (error.response.status) {
                 HttpStatusCode.InternalServerError -> onShowSnackbar(errorServer)
@@ -230,8 +223,7 @@ fun handleError(error: Exception, onShowSnackbar: (String) -> Unit) {
 
 @Composable
 fun MovieItem(movie: Movie, onMovieClicked: (Int) -> Unit) {
-    Row(
-        Modifier
+    Row(Modifier
             .fillMaxWidth()
             .clickable { onMovieClicked(movie.id) }) {
         AsyncImage(
@@ -261,14 +253,12 @@ fun MovieItem(movie: Movie, onMovieClicked: (Int) -> Unit) {
 @Composable
 fun MovieShimmerEffect() {
     Row(Modifier.fillMaxWidth()) {
-        Box(
-            Modifier
+        Box(Modifier
                 .width(128.dp)
                 .height(164.dp)
                 .padding(start = 16.dp)
                 .clip(MaterialTheme.shapes.large)
-                .shimmerEffect()
-        )
+                .shimmerEffect())
         Spacer(Modifier.padding(8.dp))
         Column(Modifier.padding(top = 16.dp, end = 16.dp)) {
             Box(

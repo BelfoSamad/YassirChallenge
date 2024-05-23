@@ -26,6 +26,7 @@ class MovieViewModel @Inject constructor(private val moviesRepository: MoviesRep
      * ************************* Methods
      */
     fun initialize(id: Int) {
+        //In case there is configuration change, do not initialize again
         if (initializeCalled) return
         initializeCalled = true
 

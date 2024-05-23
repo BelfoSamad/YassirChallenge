@@ -7,6 +7,7 @@ import org.koin.android.ext.koin.androidContext
 
 @HiltAndroidApp
 class BaseApplication : Application() {
+
     override fun onCreate() {
         super.onCreate()
         //DI with Koin
@@ -14,4 +15,5 @@ class BaseApplication : Application() {
             androidContext(this@BaseApplication)
         }
     }
+
 }

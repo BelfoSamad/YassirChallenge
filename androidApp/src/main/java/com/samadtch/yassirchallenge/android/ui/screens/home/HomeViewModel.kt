@@ -18,7 +18,11 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(private val moviesRepository: MoviesRepository) :
     ViewModel() {
 
-    // Pager
+    /**
+     * UI State of the Home Screen
+     * The Movie API returns data as a pages where each page contains 20 movies.
+     * When reaching the last 5 movies in the list, the next page will be loaded.
+     */
     val uiState = Pager(
         PagingConfig(
             initialLoadSize = 20,

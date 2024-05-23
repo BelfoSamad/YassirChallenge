@@ -11,6 +11,9 @@ import org.koin.java.KoinJavaComponent.get
 @InstallIn(ViewModelComponent::class)
 object AppModule {
 
+    /**
+     * Provides the MoviesRepository from commonMain
+     */
     @Provides
     fun provideMovieRepository(): MoviesRepository {
         return get(MoviesRepository::class.java)
