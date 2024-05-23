@@ -40,7 +40,8 @@ use the app while offline) and Paging were considered.
 - The App uses the Paging Library to fetch data based on the user's usage of the app so when the
   user reaches the end of the current page the next page is fetched.
 
-`Ktor` (**Retrofit**) was used to fetch data from the API.
+`Ktor` (**Retrofit**) was used to fetch data from the API and for security reasons, `BuildKonfig`
+(**Gradle Secrets**) was used to put the API Key on the `gradle.properties` inaccessible after build.
 
 # User Interface
 
@@ -50,6 +51,7 @@ their respective ViewModels provided by `Hilt` and collects the UiState and acts
 Also...
 
 - The UI uses **Material3 Theme** which is the latest Google UI Standard.
+- `Coil` (Glide) was used to Load the Images.
 - For User Experience while the data is fetched, a shimmer effect is shown informing the user that
   the data is loading.
 - Errors are handled and a Snackbar is shown with the Error Message.
@@ -57,6 +59,7 @@ Also...
 - Splash Screen
 
 # Screenshots
+
 ![Screenshot 1](./screenshots/01.png)
 ![Screenshot 2](./screenshots/02.png)
 ![Screenshot 3](./screenshots/03.png)
